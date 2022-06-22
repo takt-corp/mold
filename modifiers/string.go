@@ -12,6 +12,7 @@ import (
 	"github.com/segmentio/go-camelcase"
 	"github.com/segmentio/go-snakecase"
 	"github.com/takt-corp/mold"
+	"golang.org/x/text/cases"
 )
 
 // trimSpace trims extra space from text
@@ -90,7 +91,7 @@ func snakeCase(ctx context.Context, fl mold.FieldLevel) error {
 func titleCase(ctx context.Context, fl mold.FieldLevel) error {
 	switch fl.Field().Kind() {
 	case reflect.String:
-		fl.Field().SetString(strings.Title(fl.Field().String()))
+		fl.Field().SetString(cases.Title(fl.Field().String()))
 	}
 	return nil
 }
