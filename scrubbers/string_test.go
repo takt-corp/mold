@@ -1,10 +1,11 @@
-package scrubbers
+package scrubbers_test
 
 import (
 	"context"
 	"testing"
 
 	. "github.com/go-playground/assert/v2"
+	"github.com/takt-corp/mold/scrubbers"
 )
 
 // NOTES:
@@ -19,8 +20,8 @@ import (
 //
 
 func TestEmails(t *testing.T) {
-	scrub := New()
-	email := "Dean.Karn@gmail.com"
+	scrub := scrubbers.New()
+	email := "Takt.Engineering@takt.io"
 
 	type Test struct {
 		Email string `scrub:"emails"`
@@ -29,26 +30,26 @@ func TestEmails(t *testing.T) {
 	tt := Test{Email: email}
 	err := scrub.Struct(context.Background(), &tt)
 	Equal(t, err, nil)
-	Equal(t, tt.Email, "<<scrubbed::email::sha1::5131512f2d165ca283b055bc6f32bc01dd23121e>>@gmail.com")
+	Equal(t, tt.Email, "<<scrubbed::email::sha1::16f0299fc5a801dc4f286fc1148d53bf2c28b306>>@takt.io")
 
 	err = scrub.Field(context.Background(), &email, "emails")
 	Equal(t, err, nil)
-	Equal(t, email, "<<scrubbed::email::sha1::5131512f2d165ca283b055bc6f32bc01dd23121e>>@gmail.com")
+	Equal(t, email, "<<scrubbed::email::sha1::16f0299fc5a801dc4f286fc1148d53bf2c28b306>>@takt.io")
 
 	var iface interface{}
 	err = scrub.Field(context.Background(), &iface, "emails")
 	Equal(t, err, nil)
 	Equal(t, iface, nil)
 
-	iface = "Dean.Karn@gmail.com"
+	iface = "Takt.Engineering@takt.io"
 	err = scrub.Field(context.Background(), &iface, "emails")
 	Equal(t, err, nil)
-	Equal(t, iface, "<<scrubbed::email::sha1::5131512f2d165ca283b055bc6f32bc01dd23121e>>@gmail.com")
+	Equal(t, iface, "<<scrubbed::email::sha1::16f0299fc5a801dc4f286fc1148d53bf2c28b306>>@takt.io")
 }
 
 func TestText(t *testing.T) {
-	scrub := New()
-	name := "Joey Bloggs"
+	scrub := scrubbers.New()
+	name := "Takt Engineering"
 
 	type Test struct {
 		String string `scrub:"text"`
@@ -57,25 +58,25 @@ func TestText(t *testing.T) {
 	tt := Test{String: name}
 	err := scrub.Struct(context.Background(), &tt)
 	Equal(t, err, nil)
-	Equal(t, tt.String, "<<scrubbed::text::sha1::028f74c1850aa1efb33a2e8746c0f4183e1e8e30>>")
+	Equal(t, tt.String, "<<scrubbed::text::sha1::5e084d3528084e014ddfece7c2e97c6c0ca2a660>>")
 
 	err = scrub.Field(context.Background(), &name, "text")
 	Equal(t, err, nil)
-	Equal(t, name, "<<scrubbed::text::sha1::028f74c1850aa1efb33a2e8746c0f4183e1e8e30>>")
+	Equal(t, name, "<<scrubbed::text::sha1::5e084d3528084e014ddfece7c2e97c6c0ca2a660>>")
 
 	var iface interface{}
 	err = scrub.Field(context.Background(), &iface, "text")
 	Equal(t, err, nil)
 	Equal(t, iface, nil)
 
-	iface = "Joey Bloggs"
+	iface = "Takt Engineering"
 	err = scrub.Field(context.Background(), &iface, "text")
 	Equal(t, err, nil)
-	Equal(t, iface, "<<scrubbed::text::sha1::028f74c1850aa1efb33a2e8746c0f4183e1e8e30>>")
+	Equal(t, iface, "<<scrubbed::text::sha1::5e084d3528084e014ddfece7c2e97c6c0ca2a660>>")
 
 	// testing Text wrapped func
-	name = "Joey Bloggs"
+	name = "Takt Engineering"
 	err = scrub.Field(context.Background(), &name, "name")
 	Equal(t, err, nil)
-	Equal(t, name, "<<scrubbed::name::sha1::028f74c1850aa1efb33a2e8746c0f4183e1e8e30>>")
+	Equal(t, name, "<<scrubbed::name::sha1::5e084d3528084e014ddfece7c2e97c6c0ca2a660>>")
 }

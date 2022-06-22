@@ -1,4 +1,4 @@
-package mold
+package mold_test
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 	"time"
 
 	. "github.com/go-playground/assert/v2"
+	"github.com/takt-corp/mold"
 )
 
 // NOTES:
@@ -23,8 +24,8 @@ import (
 //
 
 func TestBadValues(t *testing.T) {
-	tform := New()
-	tform.Register("blah", func(ctx context.Context, fl FieldLevel) error { return nil })
+	tform := mold.New()
+	tform.Register("blah", func(ctx context.Context, fl mold.FieldLevel) error { return nil })
 
 	type Test struct {
 		Ignore string `mold:"-"`
@@ -73,7 +74,7 @@ func TestBadValues(t *testing.T) {
 	PanicMatches(t, func() { tform.Register("", nil) }, "Function Key cannot be empty")
 	PanicMatches(t, func() { tform.Register("test", nil) }, "Function cannot be empty")
 	PanicMatches(t, func() {
-		tform.Register(",", func(ctx context.Context, fl FieldLevel) error { return nil })
+		tform.Register(",", func(ctx context.Context, fl mold.FieldLevel) error { return nil })
 	}, "Tag ',' either contains restricted characters or is the same as a restricted tag needed for normal operation")
 
 	PanicMatches(t, func() { tform.RegisterAlias("", "") }, "Alias cannot be empty")
@@ -89,19 +90,13 @@ func TestBasicTransform(t *testing.T) {
 
 	var tt Test
 
-	set := New()
+	set := mold.New()
 	set.SetTagName("r")
-	set.Register("repl", func(ctx context.Context, fl FieldLevel) error {
+	set.Register("repl", func(ctx context.Context, fl mold.FieldLevel) error {
 		fl.Field().SetString("test")
 		return nil
 	})
 
-	val := reflect.ValueOf(tt)
-	// trigger a wait in struct parsing
-	for i := 0; i < 3; i++ {
-		_, err := set.extractStructCache(val)
-		Equal(t, err, nil)
-	}
 	err := set.Struct(context.Background(), &tt)
 	Equal(t, err, nil)
 	Equal(t, tt.String, "test")
@@ -156,7 +151,7 @@ func TestBasicTransform(t *testing.T) {
 
 	var tt6 Test6
 
-	set.Register("default", func(ctx context.Context, fl FieldLevel) error {
+	set.Register("default", func(ctx context.Context, fl mold.FieldLevel) error {
 		fl.Field().Set(reflect.New(fl.Field().Type().Elem()))
 		return nil
 	})
@@ -209,7 +204,7 @@ func TestBasicTransform(t *testing.T) {
 	Equal(t, err.Error(), "unregistered/undefined transformation 'nonexistant' found on field")
 
 	<-done
-	set.Register("dummy", func(ctx context.Context, fl FieldLevel) error { return nil })
+	set.Register("dummy", func(ctx context.Context, fl mold.FieldLevel) error { return nil })
 	err = set.Field(context.Background(), &tt6.String, "dummy")
 	Equal(t, err, nil)
 }
@@ -222,13 +217,13 @@ func TestAlias(t *testing.T) {
 
 	var tt Test
 
-	set := New()
+	set := mold.New()
 	set.SetTagName("r")
-	set.Register("repl", func(ctx context.Context, fl FieldLevel) error {
+	set.Register("repl", func(ctx context.Context, fl mold.FieldLevel) error {
 		fl.Field().SetString("test")
 		return nil
 	})
-	set.Register("repl2", func(ctx context.Context, fl FieldLevel) error {
+	set.Register("repl2", func(ctx context.Context, fl mold.FieldLevel) error {
 		fl.Field().SetString("test2")
 		return nil
 	})
@@ -263,16 +258,16 @@ func TestArray(t *testing.T) {
 		Arr []string `s:"defaultArr,dive,defaultStr"`
 	}
 
-	set := New()
+	set := mold.New()
 	set.SetTagName("s")
-	set.Register("defaultArr", func(ctx context.Context, fl FieldLevel) error {
-		if HasValue(fl.Field()) {
+	set.Register("defaultArr", func(ctx context.Context, fl mold.FieldLevel) error {
+		if mold.HasValue(fl.Field()) {
 			return nil
 		}
 		fl.Field().Set(reflect.MakeSlice(fl.Field().Type(), 2, 2))
 		return nil
 	})
-	set.Register("defaultStr", func(ctx context.Context, fl FieldLevel) error {
+	set.Register("defaultStr", func(ctx context.Context, fl mold.FieldLevel) error {
 		if fl.Field().String() == "ok" {
 			return errors.New("ALREADY OK")
 		}
@@ -311,16 +306,16 @@ func TestMap(t *testing.T) {
 		Map map[string]string `s:"defaultMap,dive,defaultStr"`
 	}
 
-	set := New()
+	set := mold.New()
 	set.SetTagName("s")
-	set.Register("defaultMap", func(ctx context.Context, fl FieldLevel) error {
-		if HasValue(fl.Field()) {
+	set.Register("defaultMap", func(ctx context.Context, fl mold.FieldLevel) error {
+		if mold.HasValue(fl.Field()) {
 			return nil
 		}
 		fl.Field().Set(reflect.MakeMap(fl.Field().Type()))
 		return nil
 	})
-	set.Register("defaultStr", func(ctx context.Context, fl FieldLevel) error {
+	set.Register("defaultStr", func(ctx context.Context, fl mold.FieldLevel) error {
 		if fl.Field().String() == "ok" {
 			return errors.New("ALREADY OK")
 		}
@@ -370,24 +365,24 @@ func TestInterface(t *testing.T) {
 		String string `s:"error"`
 	}
 
-	set := New()
+	set := mold.New()
 	set.SetTagName("s")
-	set.Register("default", func(ctx context.Context, fl FieldLevel) error {
+	set.Register("default", func(ctx context.Context, fl mold.FieldLevel) error {
 		fl.Field().Set(reflect.ValueOf(Inner{STR: "test"}))
 		return nil
 	})
-	set.Register("default2", func(ctx context.Context, fl FieldLevel) error {
+	set.Register("default2", func(ctx context.Context, fl mold.FieldLevel) error {
 		fl.Field().Set(reflect.ValueOf(Inner2{}))
 		return nil
 	})
-	set.Register("defaultStr", func(ctx context.Context, fl FieldLevel) error {
-		if HasValue(fl.Field()) && fl.Field().String() == "ok" {
+	set.Register("defaultStr", func(ctx context.Context, fl mold.FieldLevel) error {
+		if mold.HasValue(fl.Field()) && fl.Field().String() == "ok" {
 			return errors.New("ALREADY OK")
 		}
 		fl.Field().Set(reflect.ValueOf("default"))
 		return nil
 	})
-	set.Register("error", func(ctx context.Context, fl FieldLevel) error {
+	set.Register("error", func(ctx context.Context, fl mold.FieldLevel) error {
 		return errors.New("BAD VALUE")
 	})
 
@@ -446,13 +441,13 @@ func TestInterfacePtr(t *testing.T) {
 		String string `s:"defaultStr"`
 	}
 
-	set := New()
+	set := mold.New()
 	set.SetTagName("s")
-	set.Register("default", func(ctx context.Context, fl FieldLevel) error {
+	set.Register("default", func(ctx context.Context, fl mold.FieldLevel) error {
 		fl.Field().Set(reflect.ValueOf(new(Inner)))
 		return nil
 	})
-	set.Register("defaultStr", func(ctx context.Context, fl FieldLevel) error {
+	set.Register("defaultStr", func(ctx context.Context, fl mold.FieldLevel) error {
 		if fl.Field().String() == "ok" {
 			return errors.New("ALREADY OK")
 		}
@@ -485,8 +480,8 @@ func TestStructLevel(t *testing.T) {
 		String string
 	}
 
-	set := New()
-	set.RegisterStructLevel(func(ctx context.Context, sl StructLevel) error {
+	set := mold.New()
+	set.RegisterStructLevel(func(ctx context.Context, sl mold.StructLevel) error {
 		s := sl.Struct().Interface().(Test)
 		if s.String == "error" {
 			return errors.New("BAD VALUE")
@@ -510,8 +505,8 @@ func TestTimeType(t *testing.T) {
 
 	var tt time.Time
 
-	set := New()
-	set.Register("default", func(ctx context.Context, fl FieldLevel) error {
+	set := mold.New()
+	set.Register("default", func(ctx context.Context, fl mold.FieldLevel) error {
 		fl.Field().Set(reflect.ValueOf(time.Now()))
 		return nil
 	})
@@ -521,7 +516,7 @@ func TestTimeType(t *testing.T) {
 
 	err = set.Field(context.Background(), &tt, "default,dive")
 	NotEqual(t, err, nil)
-	Equal(t, errors.Is(err, ErrInvalidDive), true)
+	Equal(t, errors.Is(err, mold.ErrInvalidDive), true)
 }
 
 func TestParam(t *testing.T) {
@@ -530,9 +525,9 @@ func TestParam(t *testing.T) {
 		String string `r:"ltrim=#$_"`
 	}
 
-	set := New()
+	set := mold.New()
 	set.SetTagName("r")
-	set.Register("ltrim", func(ctx context.Context, fl FieldLevel) error {
+	set.Register("ltrim", func(ctx context.Context, fl mold.FieldLevel) error {
 		fl.Field().SetString(strings.TrimLeft(fl.Field().String(), fl.Param()))
 		return nil
 	})
@@ -550,13 +545,13 @@ func TestDiveKeys(t *testing.T) {
 		Map map[string]string `s:"dive,keys,default,endkeys,default"`
 	}
 
-	set := New()
+	set := mold.New()
 	set.SetTagName("s")
-	set.Register("default", func(ctx context.Context, fl FieldLevel) error {
+	set.Register("default", func(ctx context.Context, fl mold.FieldLevel) error {
 		fl.Field().Set(reflect.ValueOf("after"))
 		return nil
 	})
-	set.Register("err", func(ctx context.Context, fl FieldLevel) error {
+	set.Register("err", func(ctx context.Context, fl mold.FieldLevel) error {
 		return errors.New("err")
 	})
 
@@ -583,13 +578,10 @@ func TestDiveKeys(t *testing.T) {
 	Equal(t, val, "after")
 
 	err = set.Field(context.Background(), &m, "keys,endkeys,default")
-	Equal(t, err, ErrInvalidKeysTag)
+	Equal(t, err, mold.ErrInvalidKeysTag)
 
 	err = set.Field(context.Background(), &m, "dive,endkeys,default")
-	Equal(t, err, ErrUndefinedKeysTag)
-
-	err = set.Field(context.Background(), &m, "dive,keys,undefinedtag")
-	Equal(t, err, ErrUndefinedTag{tag: "undefinedtag"})
+	Equal(t, err, mold.ErrUndefinedKeysTag)
 
 	err = set.Field(context.Background(), &m, "dive,keys,err,endkeys")
 	NotEqual(t, err, nil)
@@ -613,16 +605,16 @@ func TestStructArray(t *testing.T) {
 		ArrNoTag []InnerStruct
 	}
 
-	set := New()
+	set := mold.New()
 	set.SetTagName("s")
-	set.Register("defaultArr", func(ctx context.Context, fl FieldLevel) error {
-		if HasValue(fl.Field()) {
+	set.Register("defaultArr", func(ctx context.Context, fl mold.FieldLevel) error {
+		if mold.HasValue(fl.Field()) {
 			return nil
 		}
 		fl.Field().Set(reflect.MakeSlice(fl.Field().Type(), 2, 2))
 		return nil
 	})
-	set.Register("defaultStr", func(ctx context.Context, fl FieldLevel) error {
+	set.Register("defaultStr", func(ctx context.Context, fl mold.FieldLevel) error {
 		if fl.Field().String() == "ok" {
 			return errors.New("ALREADY OK")
 		}
