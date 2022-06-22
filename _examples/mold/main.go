@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/go-playground/mold/v4"
+	"github.com/takt-corp/mold"
 )
 
 var tform *mold.Transformer

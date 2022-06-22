@@ -1,4 +1,4 @@
-package modifiers
+package modifiers_test
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+	"github.com/takt-corp/mold/modifiers"
 )
 
 // NOTES:
@@ -29,16 +30,16 @@ func TestEnumType(t *testing.T) {
 	const START State = "start"
 	state := State("START")
 
-	conform := New()
+	conform := modifiers.New()
 	err := conform.Field(context.Background(), &state, "lcase")
 	assert.NoError(err)
 	assert.Equal(START, state)
 }
 
 func TestEmails(t *testing.T) {
-	conform := New()
+	conform := modifiers.New()
 
-	email := "           Dean.Karn@gmail.com            "
+	email := "           Takt.Engineering@takt.io            "
 
 	type Test struct {
 		Email string `mod:"trim"`
@@ -49,7 +50,7 @@ func TestEmails(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if tt.Email != "Dean.Karn@gmail.com" {
+	if tt.Email != "Takt.Engineering@takt.io" {
 		t.Fatalf("Unexpected value '%s'\n", tt.Email)
 	}
 
@@ -57,7 +58,7 @@ func TestEmails(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if email != "Dean.Karn@gmail.com" {
+	if email != "Takt.Engineering@takt.io" {
 		t.Fatalf("Unexpected value '%s'\n", tt.Email)
 	}
 
@@ -81,7 +82,7 @@ func TestEmails(t *testing.T) {
 }
 
 func TestTrimLeft(t *testing.T) {
-	conform := New()
+	conform := modifiers.New()
 
 	s := "#$%_test"
 	expected := "test"
@@ -127,7 +128,7 @@ func TestTrimLeft(t *testing.T) {
 }
 
 func TestTrimRight(t *testing.T) {
-	conform := New()
+	conform := modifiers.New()
 
 	s := "test#$%_"
 	expected := "test"
@@ -173,7 +174,7 @@ func TestTrimRight(t *testing.T) {
 }
 
 func TestTrimPrefix(t *testing.T) {
-	conform := New()
+	conform := modifiers.New()
 
 	s := "pre-test"
 	expected := "test"
@@ -219,7 +220,7 @@ func TestTrimPrefix(t *testing.T) {
 }
 
 func TestTrimSuffix(t *testing.T) {
-	conform := New()
+	conform := modifiers.New()
 
 	s := "test-suffix"
 	expected := "test"
@@ -265,7 +266,7 @@ func TestTrimSuffix(t *testing.T) {
 }
 
 func TestToLower(t *testing.T) {
-	conform := New()
+	conform := modifiers.New()
 
 	s := "TEST"
 	expected := "test"
@@ -311,7 +312,7 @@ func TestToLower(t *testing.T) {
 }
 
 func TestToUpper(t *testing.T) {
-	conform := New()
+	conform := modifiers.New()
 
 	s := "test"
 	expected := "TEST"
@@ -357,7 +358,7 @@ func TestToUpper(t *testing.T) {
 }
 
 func TestSnakeCase(t *testing.T) {
-	conform := New()
+	conform := modifiers.New()
 
 	s := "ThisIsSNAKEcase"
 	expected := "this_is_snakecase"
@@ -403,7 +404,7 @@ func TestSnakeCase(t *testing.T) {
 }
 
 func TestTitleCase(t *testing.T) {
-	conform := New()
+	conform := modifiers.New()
 
 	s := "this is a sentence"
 	expected := "This Is A Sentence"
@@ -449,7 +450,7 @@ func TestTitleCase(t *testing.T) {
 }
 
 func TestNameCase(t *testing.T) {
-	conform := New()
+	conform := modifiers.New()
 
 	s := "3493€848Jo-$%£@Ann "
 	expected := "Jo-Ann"
@@ -525,7 +526,7 @@ func TestNameCase(t *testing.T) {
 }
 
 func TestUCFirstCase(t *testing.T) {
-	conform := New()
+	conform := modifiers.New()
 
 	s := "this is uc first case"
 	expected := "This is uc first case"
@@ -581,7 +582,7 @@ func TestUCFirstCase(t *testing.T) {
 }
 
 func TestNumCase(t *testing.T) {
-	conform := New()
+	conform := modifiers.New()
 
 	s := "the price is €30,38"
 	expected := "3038"
@@ -628,7 +629,7 @@ func TestNumCase(t *testing.T) {
 }
 
 func TestNotNumCase(t *testing.T) {
-	conform := New()
+	conform := modifiers.New()
 
 	s := "39472349D34a34v69e8932747"
 	expected := "Dave"
@@ -674,7 +675,7 @@ func TestNotNumCase(t *testing.T) {
 }
 
 func TestAlphaCase(t *testing.T) {
-	conform := New()
+	conform := modifiers.New()
 
 	s := "!@£$%^&'()Hello 1234567890 World+[];\\"
 	expected := "HelloWorld"
@@ -720,7 +721,7 @@ func TestAlphaCase(t *testing.T) {
 }
 
 func TestNotAlphaCase(t *testing.T) {
-	conform := New()
+	conform := modifiers.New()
 
 	s := "Everything's here but the letters!"
 	expected := "'    !"
@@ -766,7 +767,7 @@ func TestNotAlphaCase(t *testing.T) {
 }
 
 func TestPunctuation(t *testing.T) {
-	conform := New()
+	conform := modifiers.New()
 
 	s := "# M5W-1E6!!!"
 	expected := " M5W1E6"
@@ -812,7 +813,7 @@ func TestPunctuation(t *testing.T) {
 }
 
 func TestCamelCase(t *testing.T) {
-	conform := New()
+	conform := modifiers.New()
 
 	s := "this_is_snakecase"
 	expected := "thisIsSnakecase"
@@ -859,7 +860,7 @@ func TestCamelCase(t *testing.T) {
 
 func TestString(t *testing.T) {
 	assert := require.New(t)
-	conform := New()
+	conform := modifiers.New()
 
 	conform.RegisterInterceptor(func(current reflect.Value) (inner reflect.Value) {
 		current.FieldByName("Valid").SetBool(true)

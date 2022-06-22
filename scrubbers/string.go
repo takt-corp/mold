@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/go-playground/mold/v4"
+	"github.com/takt-corp/mold"
 )
 
 var (

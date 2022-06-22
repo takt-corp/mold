@@ -7,9 +7,9 @@ import (
 	"net/url"
 
 	"github.com/go-playground/form/v4"
-	"github.com/go-playground/mold/v4/modifiers"
-	"github.com/go-playground/mold/v4/scrubbers"
 	"github.com/go-playground/validator/v10"
+	"github.com/takt-corp/mold/modifiers"
+	"github.com/takt-corp/mold/scrubbers"
 )
 
 // This example is centered around a form post, but doesn't have to be

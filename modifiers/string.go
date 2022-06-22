@@ -9,9 +9,9 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/go-playground/mold/v4"
 	"github.com/segmentio/go-camelcase"
 	"github.com/segmentio/go-snakecase"
+	"github.com/takt-corp/mold"
 )
 
 // trimSpace trims extra space from text

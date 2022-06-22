@@ -1,7 +1,7 @@
 package modifiers
 
 import (
-	"github.com/go-playground/mold/v4"
+	"github.com/takt-corp/mold"
 )
 
 // New returns a modifier with defaults registered
@@ -25,6 +25,7 @@ func New() *mold.Transformer {
 	mod.Register("strip_alpha_unicode", stripAlphaUnicodeCase)
 	mod.Register("strip_punctuation", stripPunctuation)
 	mod.Register("camel", camelCase)
+	mod.Register("nil_empty", nilEmpty)
 	mod.Register("default", defaultValue)
 	return mod
 }

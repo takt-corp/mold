@@ -1,4 +1,4 @@
-package modifiers
+package modifiers_test
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"time"
 
 	. "github.com/go-playground/assert/v2"
+	"github.com/takt-corp/mold/modifiers"
 )
 
 func TestDefault(t *testing.T) {
@@ -15,7 +16,7 @@ func TestDefault(t *testing.T) {
 
 	var state State
 
-	conform := New()
+	conform := modifiers.New()
 
 	tests := []struct {
 		name        string

@@ -1,7 +1,7 @@
 package scrubbers
 
 import (
-	"github.com/go-playground/mold/v4"
+	"github.com/takt-corp/mold"
 )
 
 // New returns a scrubber with defaults registered
